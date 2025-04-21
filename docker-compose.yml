@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mern-network
+
+  backend:
+    build: ./Server
+    container_name: backend_server
+    ports:
+      - "4000:4000"
+    environment:
+      JWT_KEY: "key"
+      PORT: 4000
+      MONGO_DB: "mongodb://mongo:27017/social_media_db"
+    volumes:
+      - ./Server/public/images:/app/public/images
+    depends_on:
+      - mongo
+    networks:
+      - mern-network
+
+  frontend:
+    build: ./client
+    container_name: frontend_client
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge
